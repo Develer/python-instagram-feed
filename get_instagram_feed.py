@@ -1,4 +1,5 @@
 import json
+import sys
 import wget
 import yaml
 from os import mkdir
@@ -8,17 +9,17 @@ from urllib import request
 USER_NAME = (str(input("Paste user name: ").strip()))
 # Load config
 try:
-    with open("config.yaml") as f:
+    with open("myconfig.yaml") as f:
         config = yaml.load(f.read())
 except FileNotFoundError:
-    raise "Error in frontend: couldn't find frontend.yaml config."
+    raise "couldn't find config.yaml config."
 except Exception as e:
     raise "Error: %s" % e
 CLIENT_ID = config['CLIENT_ID']
 CLIENT_SECRET = config['CLIENT_SECRET']
 REDIRECT_URI = config['REDIRECT_URI']
-
-
+# i = 0
+# @static_var("counter", 0)
 def download_feed(url):
     resp = request.urlopen(url)
     feed = resp.read()
@@ -26,9 +27,15 @@ def download_feed(url):
     data = feed.get('data')
     if data:
         for img in feed['data']:
-            url = '%s\n' % img['images']['standard_resolution']['url']
-            print(url)
-            wget.download(url, USER_NAME)
+            url = '%s' % img['images']['standard_resolution']['url']
+            # print(url)
+            try:
+                wget.download(url, USER_NAME)
+                # count += 1
+                # sys.stdout.write("\rPhotos count %i" % count)
+                sys.stdout.flush()
+            except Exception as e:
+                print("Error: %s" % e)
     next_page_url = feed.get('pagination')
     if next_page_url:
         download_feed(next_page_url['next_url'])
